@@ -13,15 +13,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Calculate reading time for a post.
+ * Calculate reading time for a post with caching optimization.
  *
- * @param int $post_id Post ID.
+ * Caches word count and reading time in post meta on first calculation
+ * to avoid repeated expensive string operations.
+ *
+ * @param int  $post_id Post ID.
+ * @param bool $force   Force recalculation.
  *
  * @return int Reading time in minutes.
  */
-function colormag_calculate_reading_time( $post_id = null ) {
+function colormag_calculate_reading_time( $post_id = null, $force = false ) {
 	if ( null === $post_id ) {
 		$post_id = get_the_ID();
+	}
+
+	// Check cache first unless force recalculation.
+	if ( ! $force ) {
+		$cached_time = get_post_meta( $post_id, '_colormag_reading_time', true );
+		if ( ! empty( $cached_time ) && is_numeric( $cached_time ) ) {
+			return (int) $cached_time;
+		}
 	}
 
 	$content = get_post_field( 'post_content', $post_id );
@@ -36,8 +48,17 @@ function colormag_calculate_reading_time( $post_id = null ) {
 	$content = strip_shortcodes( $content );
 	$content = wp_strip_all_tags( $content );
 
-	// Count words.
-	$word_count = str_word_count( $content );
+	// Count words with caching.
+	$word_count = get_post_meta( $post_id, '_colormag_word_count', true );
+	
+	if ( empty( $word_count ) || $force ) {
+		// Use preg_split for better accuracy with Unicode.
+		$words = preg_split( '/[\s\p{P}]+/u', trim( $content ), -1, PREG_SPLIT_NO_EMPTY );
+		$word_count = is_array( $words ) ? count( $words ) : str_word_count( $content );
+		
+		// Cache word count.
+		update_post_meta( $post_id, '_colormag_word_count', $word_count );
+	}
 
 	// Average reading speed: 200 words per minute.
 	$reading_speed = apply_filters( 'colormag_reading_speed', 200 );
@@ -46,7 +67,12 @@ function colormag_calculate_reading_time( $post_id = null ) {
 	$reading_time = ceil( $word_count / $reading_speed );
 
 	// Minimum 1 minute.
-	return max( 1, $reading_time );
+	$reading_time = max( 1, $reading_time );
+
+	// Cache reading time.
+	update_post_meta( $post_id, '_colormag_reading_time', $reading_time );
+
+	return $reading_time;
 }
 
 /**
@@ -98,6 +124,54 @@ function colormag_add_reading_time_meta_box() {
 }
 
 add_action( 'add_meta_boxes', 'colormag_add_reading_time_meta_box' );
+
+/**
+ * Invalidate reading time and word count cache when post is updated.
+ *
+ * @param int     $post_id Post ID.
+ * @param WP_Post $post    Post object.
+ */
+function colormag_invalidate_reading_time_cache( $post_id, $post ) {
+	// Only for published posts.
+	if ( get_post_status( $post_id ) !== 'publish' ) {
+		return;
+	}
+
+	delete_post_meta( $post_id, '_colormag_reading_time' );
+	delete_post_meta( $post_id, '_colormag_word_count' );
+}
+
+add_action( 'save_post', 'colormag_invalidate_reading_time_cache', 10, 2 );
+
+/**
+ * Pre-calculate reading time for existing posts without cache.
+ * Useful for bulk optimization.
+ *
+ * @param int $limit Number of posts to process.
+ */
+function colormag_bulk_calculate_reading_time( $limit = 100 ) {
+	global $wpdb;
+
+	$posts = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} 
+			 WHERE post_type = 'post' 
+			 AND post_status = 'publish'
+			 AND ID NOT IN (
+				 SELECT post_id FROM {$wpdb->postmeta} 
+				 WHERE meta_key = '_colormag_reading_time'
+			 )
+			 LIMIT %d",
+			$limit
+		)
+	);
+
+	foreach ( $posts as $post_id ) {
+		colormag_calculate_reading_time( $post_id, true );
+	}
+
+	return count( $posts );
+}
 
 /**
  * Reading time meta box callback.
