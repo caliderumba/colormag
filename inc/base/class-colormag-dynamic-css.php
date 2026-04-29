@@ -30,6 +30,14 @@ class ColorMag_Dynamic_CSS {
 	 */
 	public static function render_output( $dynamic_css, $dynamic_css_filtered = '' ) {
 
+		// Cache key for transient.
+		$cache_key = 'colormag_dynamic_css_v2';
+		$cached_css = get_transient( $cache_key );
+
+		if ( false !== $cached_css ) {
+			return $cached_css;
+		}
+
 		// Generate dynamic CSS.
 		$parse_css = '';
 
@@ -1646,6 +1654,9 @@ class ColorMag_Dynamic_CSS {
 		);
 
 		$parse_css .= colormag_parse_css( '#207daf', $primary_color, $primary_color_css );
+
+		// Cache the generated CSS for 1 day.
+		set_transient( $cache_key, $parse_css, DAY_IN_SECONDS );
 
 		return $parse_css;
 	}
