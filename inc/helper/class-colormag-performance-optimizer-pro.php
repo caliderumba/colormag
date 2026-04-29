@@ -117,10 +117,16 @@ if ( ! class_exists( 'ColorMag_Performance_Optimizer_Pro' ) ) {
 		 * Prevents repeated database queries for the same theme mod.
 		 * 
 		 * @param mixed  $value The value of the theme mod.
-		 * @param string $mod   The theme mod name.
+		 * @param string $mod   The theme mod name (optional, for backward compatibility).
 		 * @return mixed Cached or fresh theme mod value.
 		 */
-		public function cache_theme_mod( $value, $mod ) {
+		public function cache_theme_mod( $value, $mod = '' ) {
+			// If mod name is provided, use it; otherwise try to get from backtrace
+			if ( empty( $mod ) ) {
+				// Fallback: don't cache if we don't know the mod name
+				return $value;
+			}
+			
 			if ( ! isset( self::$cached_theme_mods[ $mod ] ) ) {
 				self::$cached_theme_mods[ $mod ] = $value;
 			}
