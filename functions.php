@@ -46,6 +46,8 @@ require get_template_directory() . '/inc/shortcodes/class-colormag-video-shortco
 require get_template_directory() . '/inc/helper/class-colormag-post-views.php';
 require get_template_directory() . '/inc/helper/class-colormag-reading-time.php';
 require get_template_directory() . '/inc/helper/class-colormag-related-posts.php';
+require get_template_directory() . '/inc/helper/class-colormag-performance-optimizer.php';
+require get_template_directory() . '/inc/helper/class-colormag-performance-optimizer-pro.php';
 
 
 ///** ColorMag setup file, hooked for `after_setup_theme`. */
