@@ -271,6 +271,7 @@ function colormag_widgets_init() {
 	register_widget( 'colormag_highlighted_posts_widget' );
 	register_widget( 'colormag_featured_posts_widget' );
 	register_widget( 'colormag_featured_posts_vertical_widget' );
+	register_widget( 'colormag_featured_videos_widget' );
 	register_widget( 'colormag_728x90_advertisement_widget' );
 	register_widget( 'colormag_300x250_advertisement_widget' );
 	register_widget( 'colormag_125x125_advertisement_widget' );
@@ -344,6 +345,9 @@ require COLORMAG_WIDGETS_DIR . '/colormag-featured-posts-widget.php';
 
 // Require file for TG: Featured Post style 2.
 require COLORMAG_WIDGETS_DIR . '/colormag-featured-posts-vertical-widget.php';
+
+// Require file for TG: Featured Videos widget.
+require COLORMAG_WIDGETS_DIR . '/colormag-featured-videos-widget.php';
 
 // Require file for TG: 300x250 Advertisement.
 require COLORMAG_WIDGETS_DIR . '/colormag-300x250-advertisement-widget.php';
