@@ -217,25 +217,28 @@ if ( ! class_exists( 'ColorMag_Enqueue_Scripts' ) ) {
 			// Navigation JS.
 			wp_enqueue_script( 'colormag-navigation', COLORMAG_JS_URL . '/navigation' . $suffix . '.js', array( 'jquery' ), COLORMAG_THEME_VERSION, true );
 
-			// Font Awesome 4.
-			$font_awesome_styles = array(
-				array(
-					'handle'  => 'font-awesome-4',
-					'file'    => '/library/font-awesome/css/v4-shims',
-					'version' => '4.7.0',
-				),
-			);
-
-			foreach ( $font_awesome_styles as $style ) {
-				wp_register_style(
-					$style['handle'],
-					get_template_directory_uri() . '/assets' . $style['file'] . $suffix . '.css',
-					false,
-					$style['version']
+			// Font Awesome 4 (legacy) - only if enabled.
+			if ( get_theme_mod( 'colormag_enable_legacy_icons', false ) ) {
+				$font_awesome_styles = array(
+					array(
+						'handle'  => 'font-awesome-4',
+						'file'    => '/library/font-awesome/css/v4-shims',
+						'version' => '4.7.0',
+					),
 				);
-				wp_enqueue_style( $style['handle'] );
+
+				foreach ( $font_awesome_styles as $style ) {
+					wp_register_style(
+						$style['handle'],
+						get_template_directory_uri() . '/assets' . $style['file'] . $suffix . '.css',
+						false,
+						$style['version']
+					);
+					wp_enqueue_style( $style['handle'] );
+				}
 			}
 
+			// Font Awesome 6 (current).
 			wp_enqueue_style( 'colormag-font-awesome-6', get_template_directory_uri() . '/inc/customizer/customind/assets/fontawesome/v6/css/all.min.css', array(), '6.2.4' );
 
 			// Weather Icons.
@@ -589,85 +592,25 @@ function colormag_font_subset() {
 	/**
 	 * Typography options.
 	 */
-	// Base typography.
-	$base_typography_default = array(
-		'subsets' => array( 'latin' ),
+	// List of typography settings to check.
+	$typography_settings = array(
+		'colormag_base_typography',
+		'colormag_headings_typography',
+		'colormag_h1_typography',
+		'colormag_h2_typography',
+		'colormag_h3_typography',
+		'colormag_h4_typography',
+		'colormag_h5_typography',
+		'colormag_h6_typography',
 	);
 
-	$base_typography = get_theme_mod( 'colormag_base_typography', $base_typography_default );
+	foreach ( $typography_settings as $setting ) {
+		$default = array( 'subsets' => array( 'latin' ) );
+		$typography = get_theme_mod( $setting, $default );
 
-	if ( isset( $base_typography['subsets'] ) && is_array( $base_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $base_typography['subsets'], $google_font_subsets );
-	}
-
-	// Headings typography.
-	$headings_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$headings_typography         = get_theme_mod( 'colormag_headings_typography', $headings_typography_default );
-
-	if ( isset( $headings_typography['subsets'] ) && is_array( $headings_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $headings_typography['subsets'], $google_font_subsets );
-	}
-
-	// Heading H1 typography.
-	$heading_h1_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$heading_h1_typography         = get_theme_mod( 'colormag_h1_typography', $heading_h1_typography_default );
-
-	if ( isset( $heading_h1_typography['subsets'] ) && is_array( $heading_h1_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $heading_h1_typography['subsets'], $google_font_subsets );
-	}
-
-	// Heading H2 typography.
-	$heading_h2_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$heading_h2_typography         = get_theme_mod( 'colormag_h2_typography', $heading_h2_typography_default );
-
-	if ( isset( $heading_h2_typography['subsets'] ) && is_array( $heading_h2_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $heading_h2_typography['subsets'], $google_font_subsets );
-	}
-
-	// Heading H3 typography.
-	$heading_h3_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$heading_h3_typography         = get_theme_mod( 'colormag_h3_typography', $heading_h3_typography_default );
-
-	if ( isset( $heading_h3_typography['subsets'] ) && is_array( $heading_h3_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $heading_h3_typography['subsets'], $google_font_subsets );
-	}
-
-	// Heading H4 typography.
-	$heading_h4_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$heading_h4_typography         = get_theme_mod( 'colormag_h4_typography', $heading_h4_typography_default );
-
-	if ( isset( $heading_h4_typography['subsets'] ) && is_array( $heading_h4_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $heading_h4_typography['subsets'], $google_font_subsets );
-	}
-
-	// Heading H5 typography.
-	$heading_h5_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$heading_h5_typography         = get_theme_mod( 'colormag_h5_typography', $heading_h5_typography_default );
-
-	if ( isset( $heading_h5_typography['subsets'] ) && is_array( $heading_h5_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $heading_h5_typography['subsets'], $google_font_subsets );
-	}
-
-	// Heading H6 typography.
-	$heading_h6_typography_default = array(
-		'subsets' => array( 'latin' ),
-	);
-	$heading_h6_typography         = get_theme_mod( 'colormag_h6_typography', $heading_h6_typography_default );
-
-	if ( isset( $heading_h6_typography['subsets'] ) && is_array( $heading_h6_typography['subsets'] ) ) {
-		$google_font_subsets = array_merge( $heading_h6_typography['subsets'], $google_font_subsets );
+		if ( isset( $typography['subsets'] ) && is_array( $typography['subsets'] ) ) {
+			$google_font_subsets = array_merge( $google_font_subsets, $typography['subsets'] );
+		}
 	}
 
 	return $google_font_subsets;

@@ -109,7 +109,13 @@ return $result;
  * @return array Array of category objects.
  */
 function colormag_get_categories_optimized( $args = array(), $use_cache = true ) {
-$cache_key = 'colormag_cats_' . md5( serialize( $args ) );
+// Ensure consistent cache key by merging with defaults.
+$normalized_args = wp_parse_args( $args, array(
+	'taxonomy'   => 'category',
+	'hide_empty' => false,
+	'number'     => 0,
+) );
+$cache_key = 'colormag_cats_' . md5( serialize( $normalized_args ) );
 
 // Try to get from transient cache.
 if ( $use_cache ) {
@@ -160,6 +166,8 @@ $colormag_category_colors_cache = array();
 add_action( 'edited_terms', 'colormag_invalidate_category_cache' );
 add_action( 'created_term', 'colormag_invalidate_category_cache' );
 add_action( 'delete_term', 'colormag_invalidate_category_cache' );
+// Invalidate cache when customizer settings are saved.
+add_action( 'customize_save_after', 'colormag_invalidate_category_cache' );
 
 /**
  * Preload critical category data on init.
