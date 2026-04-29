@@ -427,8 +427,15 @@ if ( ! class_exists( 'ColorMag_Performance_Optimizer_Pro' ) ) {
 		 * @return null|array|string Cached or fresh meta value.
 		 */
 		public function cache_category_meta( $value, $object_id, $meta_key, $single ) {
+			// CRITICAL FIX: Check if $value is a WP_Error before processing
+			// This prevents "Object of class WP_Error could not be converted to string" fatal error
+			if ( is_wp_error( $value ) ) {
+				return $value;
+			}
+
 			// Only cache category meta
-			if ( get_option( 'taxonomy_' . get_term_field( 'taxonomy', $object_id, 'term_id', 'name' ) ) !== 'category' ) {
+			$term_taxonomy = get_term_field( 'taxonomy', $object_id, 'term_id', 'name' );
+			if ( is_wp_error( $term_taxonomy ) || get_option( 'taxonomy_' . $term_taxonomy ) !== 'category' ) {
 				return $value;
 			}
 			
