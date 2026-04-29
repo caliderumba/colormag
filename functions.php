@@ -35,6 +35,18 @@ if ( is_admin() ) {
 
 require get_template_directory() . '/inc/admin/class-colormag-changelog-parser.php';
 
+/**
+ * Shortcodes for video galleries and other features.
+ */
+require get_template_directory() . '/inc/shortcodes/class-colormag-video-shortcodes.php';
+
+/**
+ * Helper functions for post views, reading time, and related posts.
+ */
+require get_template_directory() . '/inc/helper/class-colormag-post-views.php';
+require get_template_directory() . '/inc/helper/class-colormag-reading-time.php';
+require get_template_directory() . '/inc/helper/class-colormag-related-posts.php';
+
 
 ///** ColorMag setup file, hooked for `after_setup_theme`. */
 require COLORMAG_INCLUDES_DIR . '/colormag-setup.php';
