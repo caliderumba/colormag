@@ -1655,9 +1655,6 @@ class ColorMag_Dynamic_CSS {
 
 		$parse_css .= colormag_parse_css( '#207daf', $primary_color, $primary_color_css );
 
-		// Cache the generated CSS for 1 day.
-		set_transient( $cache_key, $parse_css, DAY_IN_SECONDS );
-
 		return $parse_css;
 	}
 
